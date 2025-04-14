@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "fr.kayrouge.hestia.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "mixins.hestia.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "MinecraftMixin"
+  ],
+  "server": []
+}
