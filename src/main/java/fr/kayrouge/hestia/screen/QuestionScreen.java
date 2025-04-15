@@ -2,13 +2,12 @@ package fr.kayrouge.hestia.screen;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import fr.kayrouge.hera.Choice;
-import fr.kayrouge.hera.Hera;
 import fr.kayrouge.hera.PacketUtils;
 import fr.kayrouge.hestia.Hestia;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
@@ -35,6 +34,7 @@ public class QuestionScreen extends Screen {
         this.questionId = id;
         this.choices = choices;
         if(choices.length != 0) this.choice = choices[0];
+        Hestia.LOGGER.info("Open question screen for question '{}' with id: {}", message, id);
     }
 
     @Override
@@ -43,16 +43,13 @@ public class QuestionScreen extends Screen {
         for (Choice choice : this.choices) {
             switch (choice.getType()) {
                 case SIMPLE_BUTTON ->
-                        this.buttons.add(new Button(this.width/2-50, this.height/2-yOffset, 100, 20, new StringTextComponent(choice.getName()), button -> {
-                            Hestia.LOGGER.info("button pressed {}", button.getMessage().getString());
+                        this.addButton(new Button(this.width/2-50, this.height/2-yOffset, 100, 20, new StringTextComponent(choice.getName()), button -> {
                             this.choice = choice;
                             close();
                         }));
                 case TEXT_ENTRY -> {
-                    TextFieldWidget textFieldWidget = new TextFieldWidget(font, this.width/2-50, this.height/2-yOffset, 80, 20, new StringTextComponent(choice.getName()));
-                    this.buttons.add(textFieldWidget);
-                    this.buttons.add(new Button(this.width/2+30, this.height/2-yOffset, 100, 20, new StringTextComponent("Send"), button -> {
-                        Hestia.LOGGER.info("button pressed {}", button.getMessage().getString());
+                    TextFieldWidget textFieldWidget = this.addWidget(new TextFieldWidget(font, this.width/2-50, this.height/2-yOffset, 80, 20, new StringTextComponent(choice.getName())));
+                    this.addButton(new Button(this.width/2+30, this.height/2-yOffset, 100, 20, new StringTextComponent("Send"), button -> {
                         this.choice = choice;
                         this.data = textFieldWidget.getValue();
                         close();
@@ -96,12 +93,13 @@ public class QuestionScreen extends Screen {
         drawCenteredString(matrices, getMinecraft().font, this.message, this.width/2, this.height/6, Color.WHITE.getRGB());
 
         super.render(matrices, mouseX, mouseY, p_230430_4_);
+        for(int i = 0; i < this.children.size(); ++i) {
+            if(!(this.children.get(i) instanceof Button)) {
+                ((Widget)this.children.get(i)).render(matrices, mouseX, mouseY, p_230430_4_);
+            }
+        }
     }
 
-    @Override
-    public void removed() {
-        super.removed();
-    }
 
     @Override
     public void onClose() {
@@ -124,6 +122,9 @@ public class QuestionScreen extends Screen {
     private void close() {
         this.minecraft.setScreen(null);
         this.minecraft.mouseHandler.grabMouse();
+        if(this.choice != null) {
+            answer(choice);
+        }
     }
 
 

@@ -39,7 +39,6 @@ public class NetworkManager {
                         try {
                             String sousCanal = in.readUTF();
                             PlayerEntity player = Minecraft.getInstance().player;
-                            player.sendMessage(new StringTextComponent(sousCanal), Util.NIL_UUID);
                             switch (sousCanal) {
                                 case "join" -> {
                                     player.sendMessage(new StringTextComponent("Connected with Hermes, Hermes Hera version: " + in.readLong() + ", Hestia Hera version: " + Hera.VERSION), Util.NIL_UUID);
@@ -58,7 +57,6 @@ public class NetworkManager {
                                     CCustomPayloadPacket packet = new CCustomPayloadPacket(new ResourceLocation("hermes", "hestia"), buffer);
                                     manager.send(packet);
                                 }
-                                case "client" -> player.sendMessage(new StringTextComponent("CLIENT"), Util.NIL_UUID);
                                 case "question" -> {
                                     String question = in.readUTF();
                                     int questionId = in.readInt();
@@ -71,7 +69,7 @@ public class NetworkManager {
                                 }
                             }
                         } catch (IOException e) {
-                            Hestia.LOGGER.info("Erreur lecture packet");
+                            Hestia.LOGGER.info("Error reading packet");
                             e.printStackTrace();
                         }
                         heapBuf.release();
