@@ -21,6 +21,6 @@ public class Hestia
     {
         LOGGER.info("Using Hera "+ Hera.VERSION);
         MinecraftForge.EVENT_BUS.register(new NetworkManager());
-        MinecraftForge.EVENT_BUS.register(new Keybinds());
+        MinecraftForge.EVENT_BUS.register(new Keybindings());
     }
 }

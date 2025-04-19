@@ -2,9 +2,10 @@ package fr.kayrouge.hestia.screen;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import fr.kayrouge.hera.Choice;
-import fr.kayrouge.hera.PacketUtils;
+import fr.kayrouge.hera.util.PacketUtils;
 import fr.kayrouge.hestia.Hestia;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
@@ -93,9 +94,9 @@ public class QuestionScreen extends Screen {
         drawCenteredString(matrices, getMinecraft().font, this.message, this.width/2, this.height/6, Color.WHITE.getRGB());
 
         super.render(matrices, mouseX, mouseY, p_230430_4_);
-        for(int i = 0; i < this.children.size(); ++i) {
-            if(!(this.children.get(i) instanceof Button)) {
-                ((Widget)this.children.get(i)).render(matrices, mouseX, mouseY, p_230430_4_);
+        for (IGuiEventListener child : this.children) {
+            if (!(child instanceof Button)) {
+                ((Widget) child).render(matrices, mouseX, mouseY, p_230430_4_);
             }
         }
     }

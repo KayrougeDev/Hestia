@@ -1,7 +1,9 @@
 package fr.kayrouge.hestia;
 
+import com.mojang.datafixers.util.Pair;
 import fr.kayrouge.hera.Choice;
 import fr.kayrouge.hera.Hera;
+import fr.kayrouge.hestia.screen.QuestionListScreen;
 import fr.kayrouge.hestia.screen.QuestionScreen;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -19,6 +21,8 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkManager {
 
@@ -67,6 +71,7 @@ public class NetworkManager {
                                     }
                                     Minecraft.getInstance().setScreen(new QuestionScreen(question, questionId, choices));
                                 }
+                                case "questions" -> receivedQuestionList(in);
                             }
                         } catch (IOException e) {
                             Hestia.LOGGER.info("Error reading packet");
@@ -79,5 +84,18 @@ public class NetworkManager {
                 }
             });
         }
+    }
+
+    public void receivedQuestionList(DataInputStream in) throws IOException {
+        int questionListSize = in.readInt();
+        List<Pair<Integer, String>> questions = new ArrayList<>();
+        for(int i = 0; i < questionListSize; i++) {
+            int id = in.readInt();
+            String name = in.readUTF();
+            questions.add(new Pair<>(id, name));
+            Hestia.LOGGER.info("{} {}", id, name);
+        }
+
+        Minecraft.getInstance().setScreen(new QuestionListScreen(questions));
     }
 }
