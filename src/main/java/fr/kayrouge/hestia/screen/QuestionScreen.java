@@ -3,6 +3,8 @@ package fr.kayrouge.hestia.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import fr.kayrouge.hera.Choice;
 import fr.kayrouge.hera.util.PacketUtils;
+import fr.kayrouge.hera.util.type.PacketType;
+import fr.kayrouge.hera.util.type.QuestionsType;
 import fr.kayrouge.hestia.Hestia;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.gui.IGuiEventListener;
@@ -69,7 +71,8 @@ public class QuestionScreen extends Screen {
         DataOutputStream out = new DataOutputStream(baos);
 
         try {
-            out.writeUTF("answer");
+            out.writeByte(PacketType.QUESTION.getId());
+            out.writeByte(QuestionsType.ANSWER.getId());
             out.writeInt(this.questionId);
             out.writeUTF(choice.getName());
             PacketUtils.writeObject(out, this.data);

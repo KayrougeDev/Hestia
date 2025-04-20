@@ -3,6 +3,9 @@ package fr.kayrouge.hestia;
 import com.mojang.datafixers.util.Pair;
 import fr.kayrouge.hera.Choice;
 import fr.kayrouge.hera.Hera;
+import fr.kayrouge.hera.util.type.PacketType;
+import fr.kayrouge.hera.util.type.QuestionsType;
+import fr.kayrouge.hestia.network.handler.GamePacketHandler;
 import fr.kayrouge.hestia.screen.QuestionListScreen;
 import fr.kayrouge.hestia.screen.QuestionScreen;
 import io.netty.buffer.ByteBuf;
@@ -18,6 +21,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.io.*;
@@ -41,17 +45,16 @@ public class NetworkManager {
 
                         DataInputStream in = new DataInputStream(new ByteArrayInputStream(heapBuf.array()));
                         try {
-                            String sousCanal = in.readUTF();
+                            int typeID = in.readUnsignedByte();
+                            PacketType type = PacketType.getById(typeID);
                             PlayerEntity player = Minecraft.getInstance().player;
-                            switch (sousCanal) {
-                                case "join" -> {
-                                    player.sendMessage(new StringTextComponent("Connected with Hermes, Hermes Hera version: " + in.readLong() + ", Hestia Hera version: " + Hera.VERSION), Util.NIL_UUID);
-
+                            switch (type) {
+                                case JOIN -> {
                                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                                     DataOutputStream out = new DataOutputStream(baos);
 
                                     try {
-                                        out.writeUTF("heraVersion");
+                                        out.writeByte(PacketType.JOIN.getId());
                                         out.writeLong(Hera.VERSION);
                                     } catch (IOException e) {
                                         e.printStackTrace();
@@ -61,17 +64,9 @@ public class NetworkManager {
                                     CCustomPayloadPacket packet = new CCustomPayloadPacket(new ResourceLocation("hermes", "hestia"), buffer);
                                     manager.send(packet);
                                 }
-                                case "question" -> {
-                                    String question = in.readUTF();
-                                    int questionId = in.readInt();
-                                    int length = in.readInt();
-                                    Choice[] choices = new Choice[length];
-                                    for (int i = 0; i < length; i++) {
-                                        choices[i] = Choice.fromPacket(in);
-                                    }
-                                    Minecraft.getInstance().setScreen(new QuestionScreen(question, questionId, choices));
-                                }
-                                case "questions" -> receivedQuestionList(in);
+                                case QUESTION -> handleQuestionPacket(in);
+                                case TERRITORY_GAME -> GamePacketHandler.handleTerritoryGame(in);
+                                default -> Hestia.LOGGER.warn("Unsupported packet received: {} {}", type.name() ,typeID);
                             }
                         } catch (IOException e) {
                             Hestia.LOGGER.info("Error reading packet");
@@ -83,6 +78,23 @@ public class NetworkManager {
                     }
                 }
             });
+        }
+    }
+
+    private void handleQuestionPacket(DataInputStream in) throws IOException {
+        QuestionsType questionsType = QuestionsType.getById(in.readUnsignedByte());
+        switch (questionsType) {
+            case ANSWER -> {
+                String question = in.readUTF();
+                int questionId = in.readInt();
+                int length = in.readInt();
+                Choice[] choices = new Choice[length];
+                for (int i = 0; i < length; i++) {
+                    choices[i] = Choice.fromPacket(in);
+                }
+                Minecraft.getInstance().setScreen(new QuestionScreen(question, questionId, choices));
+            }
+            case LIST -> receivedQuestionList(in);
         }
     }
 

@@ -1,6 +1,7 @@
 package fr.kayrouge.hestia;
 
 import fr.kayrouge.hera.Hera;
+import fr.kayrouge.hestia.network.handler.GamePacketHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -22,5 +23,6 @@ public class Hestia
         LOGGER.info("Using Hera "+ Hera.VERSION);
         MinecraftForge.EVENT_BUS.register(new NetworkManager());
         MinecraftForge.EVENT_BUS.register(new Keybindings());
+        MinecraftForge.EVENT_BUS.register(new GamePacketHandler());
     }
 }

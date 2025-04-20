@@ -1,6 +1,8 @@
 package fr.kayrouge.hestia;
 
 import fr.kayrouge.hera.Choice;
+import fr.kayrouge.hera.util.type.PacketType;
+import fr.kayrouge.hera.util.type.QuestionsType;
 import fr.kayrouge.hestia.screen.QuestionScreen;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -36,7 +38,8 @@ public class Keybindings {
         while (QUESTION_LIST_TEST.isDown()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream out = new DataOutputStream(baos);
-            out.writeUTF("questions");
+            out.writeByte(PacketType.QUESTION.getId());
+            out.writeByte(QuestionsType.LIST.getId());
             PacketBuffer buffer = new PacketBuffer(Unpooled.wrappedBuffer(baos.toByteArray()));
             CCustomPayloadPacket packet = new CCustomPayloadPacket(new ResourceLocation("hermes", "hestia"), buffer);
             if(Minecraft.getInstance().getConnection() != null) {
