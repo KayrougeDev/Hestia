@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
     id 'org.spongepowered.mixin' version '0.7.+'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
     }
 
 version = mod_version
@@ -113,6 +114,11 @@ repositories {
     // }
 }
 
+configurations {
+    shade
+    compileClasspath.extendsFrom shade
+}
+
 dependencies {
     // Specify the version of Minecraft to use.
     // Any artifact can be supplied so long as it has a "userdev" classifier artifact and is a compatible patcher artifact.
@@ -122,7 +128,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    implementation fileTree(dir: 'lib', include: ['*.jar'])
+    shade fileTree(dir: 'lib', include: ['*.jar'])
+    runtimeOnly fileTree(dir: 'lib', include: ['*.jar'])
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
@@ -205,4 +212,8 @@ mixin {
 
     debug.verbose = true
     debug.export = true
+}
+
+shadowJar {
+    configurations = [project.configurations.shade]
 }
